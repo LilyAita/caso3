@@ -1,3 +1,0 @@
-Tiempo transaccion: 6609500 ns
-Medida de CPU: 8.200000000000001%
-Transacciones perdidas: 0
