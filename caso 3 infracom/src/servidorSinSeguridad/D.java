@@ -40,6 +40,7 @@ public class D extends Thread {
 	private static X509Certificate certSer;
 	private static KeyPair keyPairServidor;
 	private int idP;
+	private static Object yo= new Object();
 	
 	
 	public static void init(X509Certificate pCertSer, KeyPair pKeyPairServidor, File pFile) {
@@ -219,7 +220,7 @@ public class D extends Thread {
 				}
 		        sc.close();
 		        medida.escribirResultado(idP);
-		        synchronized(this)
+		        synchronized(yo)
 		        {
 		        	for (int i=0;i<numCadenas;i++) {
 				    	

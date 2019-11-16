@@ -1,5 +1,6 @@
 package mediciones;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.lang.management.ManagementFactory;
 
@@ -76,8 +77,9 @@ public class EscritorMedidas {
 	public void escribirResultado(int n) {
 
 		try {
-
-			PrintWriter pw = new PrintWriter("./data/prueba_0" + n+".txt", "UTF-8");
+			File file = new File("./data/prueba_0" + n+".txt");
+			file.getParentFile().mkdirs();
+			PrintWriter pw = new PrintWriter(file);
 			pw.println("Tiempo transaccion: " + respuesta + " ns");
 
 			pw.println("Medida de CPU: " + cpuLoad/veces + "%");
