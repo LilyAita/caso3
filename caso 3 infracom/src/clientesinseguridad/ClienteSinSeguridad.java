@@ -182,7 +182,7 @@ public class ClienteSinSeguridad {
 
 		//Crear llave simetrica
 		llaveSimetrica = AES.generadorDeLlave();
-		
+
 		//Enviar mensaje
 		enviarMensaje(DatatypeConverter.printBase64Binary(llaveSimetrica.getEncoded()));
 
@@ -197,14 +197,17 @@ public class ClienteSinSeguridad {
 	public void etapa3() throws Exception
 	{
 		//CC
-		imprimirConsola("DIGITE SU CC:");
-		String s= leerConsola();
+		//imprimirConsola("DIGITE SU CC:");
+		//String s= leerConsola();
+		String s= (int)(Math.random()*10000)+"";
+
 
 		enviarMensaje(s);
 
 		//CLAVE
-		imprimirConsola("DIGITE SU CLAVE:");
-		s= leerConsola();
+		//imprimirConsola("DIGITE SU CLAVE:");
+		//s= leerConsola();
+		s=(int)(Math.random()*10000)+"";
 
 		enviarMensaje(s);
 
@@ -219,9 +222,9 @@ public class ClienteSinSeguridad {
 		String s= recibirMensaje();
 
 		String respuesta = s;
-		
+
 		s=recibirMensaje();
-		
+
 		int hash = respuesta.hashCode();
 
 		if (hash == Integer.parseInt(s))

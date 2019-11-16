@@ -14,6 +14,8 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 
+import mediciones.EscritorMedidas;
+
 
 public class D extends Thread {
 
@@ -35,7 +37,7 @@ public class D extends Thread {
 	private static File file;
 	private static X509Certificate certSer;
 	private static KeyPair keyPairServidor;
-	
+	private int idP;
 	
 	public static void init(X509Certificate pCertSer, KeyPair pKeyPairServidor, File pFile) {
 		certSer = pCertSer;
@@ -45,6 +47,7 @@ public class D extends Thread {
 	
 	public D (Socket csP, int idP) {
 		sc = csP;
+		this.idP = idP;
 		dlg = new String("delegado " + idP + ": ");
 		try {
 		mybyte = new byte[520]; 
@@ -92,7 +95,8 @@ public class D extends Thread {
 
 				PrintWriter ac = new PrintWriter(sc.getOutputStream() , true);
 				BufferedReader dc = new BufferedReader(new InputStreamReader(sc.getInputStream()));
-
+				EscritorMedidas medida = new EscritorMedidas();
+				
 				/***** Fase 1:  *****/
 				linea = dc.readLine();
 				cadenas[0] = "Fase1: ";
@@ -107,6 +111,7 @@ public class D extends Thread {
 				}
 				
 				/***** Fase 2:  *****/
+				medida.getSystemCpuLoad();
 				linea = dc.readLine();
 				cadenas[1] = "Fase2: ";
 				if (!(linea.contains(SEPARADOR) && linea.split(SEPARADOR)[0].equals(ALGORITMOS))) {
@@ -137,6 +142,7 @@ public class D extends Thread {
 				ac.println(OK);
 				
 				/***** Fase 3:  *****/
+				medida.getSystemCpuLoad();
 				String testCert = toHexString(mybyte);
 				ac.println(testCert);
 				cadenas[2] = dlg + "envio certificado del servidor. continuando.";
@@ -144,6 +150,8 @@ public class D extends Thread {
 
 				/***** Fase 4: *****/
 				cadenas[3] = "";
+				medida.startRespuesta();
+				medida.getSystemCpuLoad();
 				linea = dc.readLine();
 				byte[] llaveSimetrica = S.ad(
 						toByteArray(linea), 
@@ -160,7 +168,9 @@ public class D extends Thread {
 				byte [ ] ciphertext1 = S.se(retoByte, simetrica, algoritmos[1]);
 				ac.println(toHexString(ciphertext1));
 				System.out.println(dlg + "envio reto cifrado con llave simetrica al cliente. continuado.");
-
+				
+				medida.getSystemCpuLoad();
+				
 				linea = dc.readLine();
 				if ((linea.equals(OK))) {
 					cadenas[4] = dlg + "recibio confirmacion del cliente:"+ linea +"-continuado.";
@@ -171,6 +181,7 @@ public class D extends Thread {
 				}
 				
 				/***** Fase 6:  *****/
+				medida.getSystemCpuLoad();
 				linea = dc.readLine();				
 				byte[] ccByte = S.sd(
 						toByteArray(linea), simetrica, algoritmos[1]);
@@ -197,7 +208,11 @@ public class D extends Thread {
 				byte [] hmac = S.hdg(valorByte, simetrica, algoritmos[3]);
 				byte[] recibo = S.ae(hmac, keyPairServidor.getPrivate(), algoritmos[2]);
 				ac.println(toHexString(recibo));
+				medida.finishRespuesta();
 				System.out.println(dlg + "envio hmac cifrado con llave privada del servidor. continuado.");
+				
+				medida.getSystemCpuLoad();
+				
 				
 				cadenas[7] = "";
 				linea = dc.readLine();	
@@ -209,6 +224,7 @@ public class D extends Thread {
 			        System.out.println(cadenas[7]);
 				}
 		        sc.close();
+		        medida.escribirResultado(idP);
 		        synchronized(this)
 		        {
 		        	for (int i=0;i<numCadenas;i++) {

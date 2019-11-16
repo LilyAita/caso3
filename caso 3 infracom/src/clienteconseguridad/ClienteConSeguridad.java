@@ -200,15 +200,17 @@ public class ClienteConSeguridad {
 	public void etapa3() throws Exception
 	{
 		//CC
-		imprimirConsola("DIGITE SU CC:");
-		String s= leerConsola();
+		//imprimirConsola("DIGITE SU CC:");
+		//String s= leerConsola();
+		String s= (int)(Math.random()*10000)+"";
 
 		String respuesta =  AES.encriptar(s, llaveSimetrica);
 		enviarMensaje(respuesta);
 
 		//CLAVE
-		imprimirConsola("DIGITE SU CLAVE:");
-		s= leerConsola();
+		//imprimirConsola("DIGITE SU CLAVE:");
+		//s= leerConsola();
+		s=(int)(Math.random()*10000)+"";
 
 		respuesta =  AES.encriptar(s, llaveSimetrica);
 		enviarMensaje(respuesta);

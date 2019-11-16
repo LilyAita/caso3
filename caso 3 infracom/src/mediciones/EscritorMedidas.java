@@ -12,7 +12,6 @@ import javax.management.ObjectName;
 
 public class EscritorMedidas {
 
-	private long verificacion;	
 	private long respuesta;
 
 	private int perdidas;
@@ -20,26 +19,19 @@ public class EscritorMedidas {
 	private int tServidor;
 
 	private double cpuLoad;
+	private double veces;
 
-	private boolean falla;
 
 	public EscritorMedidas() {
 
-		verificacion = 0;
 		respuesta = 0;
-
-		falla = false;
+		cpuLoad= 0;
+		veces=0;
+	
 	}
 
-	public void startVerificacion() {
+	
 
-		verificacion = System.nanoTime();
-	}
-
-	public void finishVerificacion() {
-
-		verificacion = System.nanoTime() - verificacion;
-	}
 	
 	public void startRespuesta() {
 
@@ -65,10 +57,7 @@ public class EscritorMedidas {
 		perdidas = Math.abs(tCliente - tServidor);
 	}
 
-	public void registrarFallo() {
 
-		falla = true;
-	}
 
 	public void getSystemCpuLoad() throws Exception {
 		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
@@ -80,7 +69,8 @@ public class EscritorMedidas {
 		// usually takes a couple of seconds before we get real values
 		if (value == -1.0) cpuLoad = Double.NaN;
 		// returns a percentage value with 1 decimal point precision
-		cpuLoad = ((int)(value * 1000) / 10.0);
+		cpuLoad += ((int)(value * 1000) / 10.0);
+		veces++;
 	}
 
 	public void escribirResultado(int n) {
@@ -88,16 +78,12 @@ public class EscritorMedidas {
 		try {
 
 			PrintWriter pw = new PrintWriter("./data/prueba_0" + n+".txt", "UTF-8");
-			pw.println("Tiempo verificación: " + verificacion + " ns");
-			pw.println("Tiempo respuesta: " + respuesta + " ns");
+			pw.println("Tiempo transaccion: " + respuesta + " ns");
 
-			pw.println("Medida de CPU: " + cpuLoad + "%");
+			pw.println("Medida de CPU: " + cpuLoad/veces + "%");
 
 			pw.println("Transacciones perdidas: " + perdidas);
 
-			String fallo = falla ? "Fallido" : "Correcto";
-
-			pw.println("Estado: " + fallo);
 			pw.close();
 
 		}catch (Exception e) {

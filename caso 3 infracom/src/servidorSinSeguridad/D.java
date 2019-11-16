@@ -14,6 +14,10 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 
+import com.sun.media.jfxmedia.Media;
+
+import mediciones.EscritorMedidas;
+
 
 public class D extends Thread {
 
@@ -35,6 +39,7 @@ public class D extends Thread {
 	private static File file;
 	private static X509Certificate certSer;
 	private static KeyPair keyPairServidor;
+	private int idP;
 	
 	
 	public static void init(X509Certificate pCertSer, KeyPair pKeyPairServidor, File pFile) {
@@ -45,6 +50,7 @@ public class D extends Thread {
 	
 	public D (Socket csP, int idP) {
 		sc = csP;
+		this.idP =idP;
 		dlg = new String("delegado " + idP + ": ");
 		try {
 		mybyte = new byte[520]; 
@@ -85,7 +91,8 @@ public class D extends Thread {
 	public void run() {
 		String[] cadenas;
 		cadenas = new String[numCadenas];
-		
+		EscritorMedidas medida = new EscritorMedidas();
+
 		String linea;
 	    System.out.println(dlg + "Empezando atencion.");
 	        try {
@@ -107,6 +114,7 @@ public class D extends Thread {
 				}
 				
 				/***** Fase 2:  *****/
+				medida.getSystemCpuLoad();
 				linea = dc.readLine();
 				cadenas[1] = "Fase2: ";
 				if (!(linea.contains(SEPARADOR) && linea.split(SEPARADOR)[0].equals(ALGORITMOS))) {
@@ -137,6 +145,7 @@ public class D extends Thread {
 				ac.println(OK);
 				
 				/***** Fase 3:  *****/
+				medida.getSystemCpuLoad();
 				String testCert = toHexString(mybyte);
 				ac.println(testCert);
 				cadenas[2] = dlg + "envio certificado del servidor. continuando.";
@@ -144,6 +153,8 @@ public class D extends Thread {
 
 				/***** Fase 4: *****/
 				cadenas[3] = "";
+				medida.startRespuesta();
+				medida.getSystemCpuLoad();
 				linea = dc.readLine();
 				byte[] llaveSimetrica = toByteArray(linea);
 				SecretKey simetrica = new SecretKeySpec(llaveSimetrica, 0, llaveSimetrica.length, algoritmos[1]);
@@ -157,7 +168,9 @@ public class D extends Thread {
 				
 				ac.println(linea);
 				System.out.println(dlg + "envio reto al cliente. continuado.");
-
+				
+				medida.getSystemCpuLoad();
+				
 				linea = dc.readLine();
 				if ((linea.equals(OK))) {
 					cadenas[4] = dlg + "recibio confirmacion del cliente:"+ linea +"-continuado.";
@@ -168,6 +181,7 @@ public class D extends Thread {
 				}
 				
 				/***** Fase 6:  *****/
+				medida.getSystemCpuLoad();
 				linea = dc.readLine();				
 				
 				String cc = linea;
@@ -189,7 +203,10 @@ public class D extends Thread {
 		        
 				
 				ac.println(strvalor.hashCode());
+				medida.finishRespuesta();
 				System.out.println(dlg + "envio hash. continuado.");
+				
+				medida.getSystemCpuLoad();
 				
 				cadenas[7] = "";
 				linea = dc.readLine();	
@@ -201,6 +218,7 @@ public class D extends Thread {
 			        System.out.println(cadenas[7]);
 				}
 		        sc.close();
+		        medida.escribirResultado(idP);
 		        synchronized(this)
 		        {
 		        	for (int i=0;i<numCadenas;i++) {
